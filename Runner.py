@@ -1,9 +1,9 @@
-from core.LatticeLexico import Lexico
-from core.LatticeSintactico import Sintactico
+from core.interpreteArchivo import ejecutar_archivo, ejecutar_linea
 
 print("=== Intérprete Lattice Encrypt ===")
 print("Escribe un comando o 'salir' para terminar).")
 print("Ejemplos:")
+print("  Leer un archivo -  ejecutar ..../file.le ")
 print("  VECTOR(1,2) SUMA VECTOR(3,4)")
 print("  MATRIZ(2,0,0,2) POR VECTOR(3,4)")
 print("  VECTOR(1,2) PUNTO VECTOR(3,4)")
@@ -15,16 +15,17 @@ while True:
             break
         if not texto.strip():
             continue
-
-        analizadorLexico = Lexico()
-        tokens = analizadorLexico.tokenizar(texto)
         
-        analizadorSintactico = Sintactico(tokens)
-        resultado = analizadorSintactico.analisisSintactico()
+        if texto.strip().startswith("ejecutar"):
+            partes = texto.strip().split()
+            if len(partes) > 1: # si hay una ruta
+                ruta = partes[1] # agarra la ruta
+                ejecutar_archivo(ruta)
+            else:
+                print("Error: Debes proporcionar la ruta del archivo (ej. ejecutar archivo.le)")
+            continue
 
-        print(f"\n[LÉXICO] Tokens generados: {tokens}\n")   
-
-        print(f"Resultado: {resultado}")
+        ejecutar_linea(texto)
 
     except Exception as e:
         print(f"Error: {e}")
