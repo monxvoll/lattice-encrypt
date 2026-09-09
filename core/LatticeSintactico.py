@@ -28,26 +28,37 @@ class Sintactico:
         self.pos = self.pos + 1
         return token   
 
+    def parsear_numero(self):
+        """Helper para parsear un número, permitiendo signos negativos"""
+        token = self.actual()
+        multiplicador = 1
+        if token and token.tipo == "RESTA":
+            self.consumir("RESTA")
+            multiplicador = -1
+            
+        num_token = self.consumir("NUMERO")
+        return float(num_token.valor) * multiplicador
+
     # --- HELPERS PARA PARSEAR ESTRUCTURAS ---
     def parsear_vector(self):
         """Parsea un vector 2D en formato: (n1, n2)"""
         self.consumir("IPAREN")
-        n1 = float(self.consumir("NUMERO").valor)
+        n1 = self.parsear_numero()
         self.consumir("COMA")
-        n2 = float(self.consumir("NUMERO").valor)
+        n2 = self.parsear_numero()
         self.consumir("DPAREN")
         return (n1, n2)
 
     def parsear_matriz(self):
         """Parsea una matriz 2x2 en formato: (m1, m2, m3, m4)"""
         self.consumir("IPAREN")
-        m1 = float(self.consumir("NUMERO").valor)
+        m1 = self.parsear_numero()
         self.consumir("COMA")
-        m2 = float(self.consumir("NUMERO").valor)
+        m2 = self.parsear_numero()
         self.consumir("COMA")
-        m3 = float(self.consumir("NUMERO").valor)
+        m3 = self.parsear_numero()
         self.consumir("COMA")
-        m4 = float(self.consumir("NUMERO").valor)
+        m4 = self.parsear_numero()
         self.consumir("DPAREN")
         return [
             [m1, m2],

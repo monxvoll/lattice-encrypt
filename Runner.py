@@ -7,6 +7,9 @@ print("  Leer un archivo -  ejecutar ..../file.le ")
 print("  VECTOR(1,2) SUMA VECTOR(3,4)")
 print("  MATRIZ(2,0,0,2) POR VECTOR(3,4)")
 print("  VECTOR(1,2) PUNTO VECTOR(3,4)")
+print("  VECTOR(1,2) RUIDO VECTOR(1,-1)")
+print("  VECTOR(1,2) RUIDO")
+print("  VECTOR(1.4, 2.6) REDONDEAR")
 
 while True:
     try:
