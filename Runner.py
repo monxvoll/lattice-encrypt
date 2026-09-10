@@ -10,6 +10,9 @@ print("  VECTOR(1,2) PUNTO VECTOR(3,4)")
 print("  VECTOR(1,2) RUIDO VECTOR(1,-1)")
 print("  VECTOR(1,2) RUIDO")
 print("  VECTOR(1.4, 2.6) REDONDEAR")
+print("  VECTOR(3,4) RESTA VECTOR(1,2)")
+print("  VECTOR(5,7) MOD VECTOR(2,3)")
+print("  VECTOR(1,2) IGUAL VECTOR(1,2)")
 
 while True:
     try:

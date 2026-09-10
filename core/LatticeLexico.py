@@ -24,6 +24,8 @@ class Lexico:
             "!": "EXCLAMACION",
             "%": "PORCENTAJE",
             "/": "DIVISION",
+            "<": "MENOR",
+            ">": "MAYOR"
         }
 
         # Diccionario de palabras reservadas
