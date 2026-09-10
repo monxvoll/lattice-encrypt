@@ -13,6 +13,9 @@ print("  VECTOR(1.4, 2.6) REDONDEAR")
 print("  VECTOR(3,4) RESTA VECTOR(1,2)")
 print("  VECTOR(5,7) MOD VECTOR(2,3)")
 print("  VECTOR(1,2) IGUAL VECTOR(1,2)")
+print("  VECTOR(0,0) TEXTO \"AB\"")
+print("  VECTOR(65,66) CARACTERES")
+print("  MATRIZ(72,79,76,65) CARACTERES")
 
 while True:
     try:
