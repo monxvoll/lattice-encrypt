@@ -22,5 +22,17 @@
     "OperacionesLattice": ["KEYGEN", "CIFRAR", "DESCIFRAR"],
     "Archivo": "ReglasLattice",
     "EjecutarRegla": "revisarSintaxisLattice"
+  },
+  {
+    "_comentario": "Grupo 5: Operaciones Aritmeticas. Resta de vectores (RESTA, base del descifrado LWE: b - <a,s>) y modulo por componentes (MOD, aritmetica mod q de LWE).",
+    "OperacionesAritmeticas": ["RESTA", "MOD"],
+    "Archivo": "ReglasAritmetica",
+    "EjecutarRegla": "revisarSintaxisAritmetica"
+  },
+  {
+    "_comentario": "Grupo 6: Operaciones de Comparacion. Igualdad exacta de vectores (IGUAL), solo verificacion/testing. No comparar secretos (timing side-channel).",
+    "OperacionesComparacion": ["IGUAL"],
+    "Archivo": "ReglasComparacion",
+    "EjecutarRegla": "revisarSintaxisComparacion"
   }
 ]
