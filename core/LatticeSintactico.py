@@ -1,5 +1,20 @@
 import json
+import os
 import importlib
+
+from core.errores import LatticeSyntaxError
+
+# La configuracion de reglas se resuelve desde la ubicacion de este archivo y se
+# lee una sola vez al importar el modulo. Antes se abria 'reglas/reglas.json'
+# con una ruta relativa al directorio de trabajo, lo que rompia al arrancar el
+# interprete o el servidor fuera de la raiz del proyecto y ademas releia el
+# disco en cada instruccion.
+_RAIZ_PROYECTO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_RUTA_REGLAS = os.path.join(_RAIZ_PROYECTO, 'reglas', 'reglas.json')
+
+with open(_RUTA_REGLAS, 'r', encoding='utf-8') as _archivo_reglas:
+    _REGLAS = json.load(_archivo_reglas)
+
 
 class Sintactico:
     """Syntax analyzer (parser) for the Lattice language."""
@@ -20,10 +35,10 @@ class Sintactico:
         token = self.actual()        
 
         if token is None:   
-            raise SyntaxError("No hay token")
+            raise LatticeSyntaxError("No hay token")
 
         if token.tipo != tipo:
-            raise SyntaxError(f"Se esperaba {tipo} y llegó {token.tipo} ({token.valor})")
+            raise LatticeSyntaxError(f"Se esperaba {tipo} y llegó {token.tipo} ({token.valor})")
 
         self.pos = self.pos + 1
         return token   
@@ -67,9 +82,8 @@ class Sintactico:
 
     # --- DESPACHADOR CENTRAL ---
     def analisisSintactico(self):
-        # 1. Leer el archivo de reglas JSON
-        with open('reglas/reglas.json', 'r') as file:
-            reglas = json.load(file)
+        # 1. Leer el archivo de reglas JSON (ya cargado en el import del modulo)
+        reglas = _REGLAS
 
         # 2. Leer el primer operando (Lado Izquierdo)
         tipo_operando = self.consumir("PALABRA").valor.upper()
@@ -79,7 +93,7 @@ class Sintactico:
         elif tipo_operando == "MATRIZ":
             lado_izquierdo = self.parsear_matriz()
         else:
-            raise SyntaxError(f"Tipo de operando inicial no reconocido: {tipo_operando}")
+            raise LatticeSyntaxError(f"Tipo de operando inicial no reconocido: {tipo_operando}")
 
         # Si ya no hay mas tokens, retornamos el operando solo
         if self.actual() is None:
@@ -102,7 +116,7 @@ class Sintactico:
                 break
 
         if not metodo_a_llamar or not archivo_a_importar:
-            raise SyntaxError(f"Operador no soportado o no definido en reglas.json: {operador}")
+            raise LatticeSyntaxError(f"Operador no soportado o no definido en reglas.json: {operador}")
 
         # 5. Ejecutar la función dinámicamente importando el archivo desde la carpeta 'reglas'
         try:

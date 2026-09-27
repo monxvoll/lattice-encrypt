@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from core.LatticeLexico import Lexico
 from core.LatticeSintactico import Sintactico
+from core.errores import LatticeError
 
 app = FastAPI(
     title="LatticeEncrypt",
@@ -37,7 +38,9 @@ def ejecutar_codigo(request: CodigoRequest):
                 token.to_json()
                 for token in tokens]
         }
-    except SyntaxError as error:
-        return {"error": str(error)}
+    except LatticeError as error:
+        # Error del lenguaje (sintaxis, tipo, valor o division): es culpa del
+        # codigo enviado, no de la API, asi que no se marca como error interno.
+        return {"error": str(error), "tipo": type(error).__name__}
     except Exception as error:
         return {"error": f"Error interno: {str(error)}"}

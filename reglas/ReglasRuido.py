@@ -1,5 +1,8 @@
 import random
 
+from core.errores import LatticeSyntaxError, LatticeTypeError
+from core.utilidades import redondear_lattice
+
 def revisarSintaxisRuido(sintactico, lado_izquierdo, operador):
     """Maneja las operaciones RUIDO y REDONDEAR"""
     
@@ -13,7 +16,7 @@ def revisarSintaxisRuido(sintactico, lado_izquierdo, operador):
                 if isinstance(lado_izquierdo, tuple):
                     return (lado_izquierdo[0] + ruido[0], lado_izquierdo[1] + ruido[1])
                 else:
-                    raise TypeError("RUIDO con VECTOR requiere un VECTOR como operando izquierdo")
+                    raise LatticeTypeError("RUIDO con VECTOR requiere un VECTOR como operando izquierdo")
             elif tipo_derecho == "MATRIZ":
                 ruido = sintactico.parsear_matriz()
                 if isinstance(lado_izquierdo, list):
@@ -22,9 +25,9 @@ def revisarSintaxisRuido(sintactico, lado_izquierdo, operador):
                         [lado_izquierdo[1][0] + ruido[1][0], lado_izquierdo[1][1] + ruido[1][1]]
                     ]
                 else:
-                    raise TypeError("RUIDO con MATRIZ requiere una MATRIZ como operando izquierdo")
+                    raise LatticeTypeError("RUIDO con MATRIZ requiere una MATRIZ como operando izquierdo")
             else:
-                raise SyntaxError(f"Tipo de operando derecho no reconocido: {tipo_derecho}")
+                raise LatticeSyntaxError(f"Tipo de operando derecho no reconocido: {tipo_derecho}")
         else:
     
             if isinstance(lado_izquierdo, tuple):
@@ -37,16 +40,16 @@ def revisarSintaxisRuido(sintactico, lado_izquierdo, operador):
                     [lado_izquierdo[1][0] + random.uniform(-0.5, 0.5), lado_izquierdo[1][1] + random.uniform(-0.5, 0.5)]
                 ]
             else:
-                raise TypeError("RUIDO requiere un VECTOR o MATRIZ")
+                raise LatticeTypeError("RUIDO requiere un VECTOR o MATRIZ")
     
     elif operador == "REDONDEAR":
 
         if isinstance(lado_izquierdo, tuple):
-            return (round(lado_izquierdo[0]), round(lado_izquierdo[1]))
+            return (redondear_lattice(lado_izquierdo[0]), redondear_lattice(lado_izquierdo[1]))
         elif isinstance(lado_izquierdo, list):
             return [
-                [round(lado_izquierdo[0][0]), round(lado_izquierdo[0][1])],
-                [round(lado_izquierdo[1][0]), round(lado_izquierdo[1][1])]
+                [redondear_lattice(lado_izquierdo[0][0]), redondear_lattice(lado_izquierdo[0][1])],
+                [redondear_lattice(lado_izquierdo[1][0]), redondear_lattice(lado_izquierdo[1][1])]
             ]
         else:
-            raise TypeError("REDONDEAR requiere un VECTOR o MATRIZ")
+            raise LatticeTypeError("REDONDEAR requiere un VECTOR o MATRIZ")
