@@ -1,5 +1,15 @@
 import re
 from core.Token import Token
+from core.errores import LatticeSyntaxError
+
+ESCAPES = {
+    "n": "\n",
+    "t": "\t",
+    "r": "\r",
+    "\\": "\\",
+    '"': '"',
+    "'": "'",
+}
 
 class Lexico:
     def __init__(self):
@@ -72,6 +82,33 @@ class Lexico:
                 i += 1
                 continue
 
+            # Leer cadenas literales. Van antes que las letras y los símbolos
+            # porque su contenido es opaco al resto del analizador: dentro de
+            # las comillas los espacios se conservan, las minúsculas son
+            # válidas y los paréntesis no son delimitadores. Sin este modo,
+            # 'TEXTO "Hola mundo"' fallaba al aplicar sobre la palabra 'Hola'
+            # la validación de mayúsculas de las instrucciones.
+            if char in ('"', "'"):
+                comilla = char
+                i += 1
+                buffer = []
+                while i < n and texto[i] != comilla:
+                    if texto[i] == "\\" and i + 1 < n:
+                        buffer.append(ESCAPES.get(texto[i + 1], "\\" + texto[i + 1]))
+                        i += 2
+                        continue
+                    buffer.append(texto[i])
+                    i += 1
+
+                if i >= n:
+                    raise LatticeSyntaxError(
+                        f"Cadena sin cerrar: falta la comilla de cierre {comilla}."
+                    )
+
+                i += 1  # consumir la comilla de cierre
+                tokens.append(Token("CADENA", "".join(buffer)))
+                continue
+
             # Leer Letras (Palabras Reservadas)
             if char.isalpha():
                 inicio = i
@@ -82,7 +119,7 @@ class Lexico:
                 
                 # Validacion estricta de mayusculas
                 if not palabra.isupper():
-                    raise SyntaxError(f"Error Léxico: La palabra '{palabra}' no es válida. Todas las instrucciones deben estar en MAYÚSCULAS.")
+                    raise LatticeSyntaxError(f"Error Léxico: La palabra '{palabra}' no es válida. Todas las instrucciones deben estar en MAYÚSCULAS.")
                     
                 tokens.append(Token("PALABRA", palabra))
                 continue
@@ -102,7 +139,7 @@ class Lexico:
                 i += 1
                 continue
 
-            raise SyntaxError(f"Carácter inesperado: {char} en la posición {i}")    
+            raise LatticeSyntaxError(f"Carácter inesperado: {char} en la posición {i}")
             
         return tokens
 

@@ -1,3 +1,5 @@
+from core.errores import LatticeSyntaxError, LatticeTypeError
+
 def revisarSintaxisBase(sintactico, lado_izquierdo, operador):
     """Maneja SUMA, POR (Multiplicación Matriz*Vector) y PUNTO (Producto Punto)"""
     
@@ -9,7 +11,7 @@ def revisarSintaxisBase(sintactico, lado_izquierdo, operador):
     elif tipo_derecho == "MATRIZ":
         lado_derecho = sintactico.parsear_matriz()
     else:
-        raise SyntaxError(f"Tipo de operando derecho no reconocido: {tipo_derecho}")
+        raise LatticeSyntaxError(f"Tipo de operando derecho no reconocido: {tipo_derecho}")
 
     # Lógica de cálculo matemático
     if operador == "SUMA":
@@ -23,11 +25,11 @@ def revisarSintaxisBase(sintactico, lado_izquierdo, operador):
             r2 = lado_izquierdo[1][0] * lado_derecho[0] + lado_izquierdo[1][1] * lado_derecho[1]
             return (r1, r2)
         else:
-            raise TypeError("Multiplicación POR requiere: MATRIZ POR VECTOR")
+            raise LatticeTypeError("Multiplicación POR requiere: MATRIZ POR VECTOR")
 
     elif operador == "PUNTO":
         # Producto Punto de dos Vectores
         if isinstance(lado_izquierdo, tuple) and isinstance(lado_derecho, tuple):
             return lado_izquierdo[0] * lado_derecho[0] + lado_izquierdo[1] * lado_derecho[1]
         else:
-            raise TypeError("Producto PUNTO requiere: VECTOR PUNTO VECTOR")
+            raise LatticeTypeError("Producto PUNTO requiere: VECTOR PUNTO VECTOR")
