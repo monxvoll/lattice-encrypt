@@ -205,6 +205,9 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# Programas guardados desde la web del editor (contenido del usuario)
+programas/
+
 # Ruff stuff:
 .ruff_cache/
 

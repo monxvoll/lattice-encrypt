@@ -4,6 +4,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY core/ ./core/
 COPY reglas/ ./reglas/
+COPY web/ ./web/
 COPY Runner.py .
 COPY servidor.py .
 EXPOSE 8000
