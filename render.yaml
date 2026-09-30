@@ -1,0 +1,28 @@
+# Infraestructura como codigo para Render.
+#
+# Con esto el servicio queda declarado en el repo: no hay que configurarlo a mano
+# en el panel. En Render: New > Blueprint, apuntar a este repositorio.
+#
+# Claves contra la referencia oficial del esquema:
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: lattice-encrypt
+    # El servicio se construye desde el Dockerfile de la raiz.
+    runtime: docker
+    # Plan gratuito: se duerme tras un rato de inactividad y no tiene disco.
+    plan: free
+    # La raiz ya devuelve el JSON de estado, asi que sirve de health check.
+    healthCheckPath: /
+    # Despliega en cada push a la rama del servicio. La forma actual de decirlo
+    # es autoDeployTrigger; `autoDeploy: true` es su equivalente deprecado.
+    autoDeployTrigger: commit
+    envVars:
+      # Demo publica: se puede ejecutar codigo pero no guardar ni borrar
+      # programas, porque el almacenamiento es compartido entre visitantes.
+      - key: MODO_DEMO
+        value: "1"
+      # Puerto y TIEMPO_LIMITE los deja Render; no hacen falta aqui. Si se
+      # quisiera cambiar el margen del interprete:
+      # - key: TIEMPO_LIMITE
+      #   value: "10"

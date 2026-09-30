@@ -1,2 +1,7 @@
-fastapi
-uvicorn
+# Versiones fijadas: sin ellas, un build futuro puede resolver una version
+# distinta de fastapi o uvicorn y romper el servicio sin que cambie el codigo.
+# Sesacadas de las instaladas en local:
+#   pip freeze | grep -iE "fastapi|uvicorn"
+# Para actualizarlas a proposito, se cambia el numero aqui y se vuelve a probar.
+fastapi==0.136.3
+uvicorn[standard]==0.48.0

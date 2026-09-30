@@ -1,0 +1,37 @@
+# Contexto de build: lo que no se lista aqui entra en la imagen.
+.git
+.gitignore
+.dockerignore
+.gitattributes
+
+# Byte-compiled
+__pycache__/
+*.py[cod]
+
+# Entornos locales
+.venv/
+venv/
+env/
+ENV/
+
+# caches de herramientas
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Artefactos de empaquetado, docs y utilidades de desarrollo
+build/
+dist/
+docs/
+tests/
+docker-compose.yml
+
+# Contenido del usuario (programas guardados desde el editor)
+programas/
+
+# Archivos sueltos del escritorio que no son parte del proyecto
+.agents/
+*.docx
+*.jpeg
+*.jpg
+.env
