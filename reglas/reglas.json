@@ -18,8 +18,8 @@
     "EjecutarRegla": "revisarSintaxisTexto"
   },
   {
-    "_comentario": "Grupo 4: Comandos Maestros Lattice. Comandos de alto nivel para generar matrices/vectores clave (KEYGEN), cifrar mensajes (CIFRAR) y descifrar (DESCIFRAR).",
-    "OperacionesLattice": ["KEYGEN", "CIFRAR", "DESCIFRAR"],
+    "_comentario": "Grupo 4: Cifrado post-cuantico. CIFRAR y DESCIFRAR texto con un par de claves. KEYGEN no esta aqui porque no lleva operando izquierdo: el analizador sintactico lo trata como prefijo (NOMBRE = KEYGEN [LWE|MLKEM]).",
+    "OperacionesLattice": ["CIFRAR", "DESCIFRAR"],
     "Archivo": "ReglasLattice",
     "EjecutarRegla": "revisarSintaxisLattice"
   },

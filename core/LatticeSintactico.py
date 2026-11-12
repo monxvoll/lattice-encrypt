@@ -152,6 +152,8 @@ class Sintactico:
         # 2. Leer el primer operando (Lado Izquierdo). TEXTO "..." al inicio
         # produce un mensaje (str) de cualquier longitud.
         token = self.actual()
+        if token is not None and token.tipo == "PALABRA" and token.valor == "KEYGEN":
+            return self._keygen()
         siguiente = self.tokens[self.pos + 1] if self.pos + 1 < len(self.tokens) else None
         if (token is not None and token.tipo == "PALABRA" and token.valor == "TEXTO"
                 and siguiente is not None and siguiente.tipo == "CADENA"):
@@ -166,6 +168,8 @@ class Sintactico:
 
         # 3. Leer el operador (ej. SUMA, POR, PUNTO)
         operador = self.consumir("PALABRA").valor.upper()
+        if operador == "KEYGEN":
+            raise LatticeSyntaxError("KEYGEN no lleva operandos: usa NOMBRE = KEYGEN [LWE|MLKEM]")
 
         # 4. Despachador: Buscar en el JSON a qué grupo pertenece el operador
         archivo_a_importar = None
@@ -183,13 +187,26 @@ class Sintactico:
         if not metodo_a_llamar or not archivo_a_importar:
             raise LatticeSyntaxError(f"Operador no soportado o no definido en reglas.json: {operador}")
 
-        # 5. Ejecutar la función dinámicamente importando el archivo desde la carpeta 'reglas'
+        # 5. Ejecutar la función dinámicamente importando el archivo desde la carpeta 'reglas'.
+        # La llamada queda fuera del try: un AttributeError o ModuleNotFoundError
+        # que ocurra DENTRO de la regla no debe reportarse como "falta el archivo".
         try:
             modulo = importlib.import_module(f"reglas.{archivo_a_importar}")
-            funcion = getattr(modulo, metodo_a_llamar)
-            # Pasamos `self` como primer argumento para que el archivo externo pueda usar consumir() y parsear()
-            return funcion(self, lado_izquierdo, operador)
         except ModuleNotFoundError:
             raise ModuleNotFoundError(f"No se encontró el archivo reglas/{archivo_a_importar}.py definido en el JSON.")
-        except AttributeError:
+        funcion = getattr(modulo, metodo_a_llamar, None)
+        if funcion is None:
             raise AttributeError(f"El archivo reglas/{archivo_a_importar}.py no contiene la función {metodo_a_llamar}.")
+        # Pasamos `self` como primer argumento para que el archivo externo pueda usar consumir() y parsear()
+        return funcion(self, lado_izquierdo, operador)
+
+    def _keygen(self):
+        """KEYGEN [LWE | MLKEM]: genera un par de claves (LWE por defecto)."""
+        self.consumir("PALABRA")
+        modo = "LWE"
+        token = self.actual()
+        if token is not None and token.tipo == "PALABRA" and token.valor in ("LWE", "MLKEM"):
+            modo = self.consumir("PALABRA").valor
+        # Import diferido: el cifrado (numpy, cryptography) solo se carga si se usa.
+        from reglas.ReglasLattice import generar_claves
+        return generar_claves(modo)
