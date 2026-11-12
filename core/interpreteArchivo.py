@@ -4,6 +4,7 @@ import os
 
 from core.LatticeLexico import Lexico
 from core.LatticeSintactico import Sintactico
+from core.entorno import Entorno
 from core.errores import LatticeError
 
 
@@ -33,7 +34,7 @@ def _serializar(valor):
     return repr(valor)
 
 
-def ejecutar_linea(texto):
+def ejecutar_linea(texto, entorno=None):
     """Interpreta una instruccion y devuelve su resultado.
 
     Si la instruccion no es valida se propaga una excepcion de core.errores
@@ -50,13 +51,13 @@ def ejecutar_linea(texto):
     analizadorLexico = Lexico()
     tokens = analizadorLexico.tokenizar(texto)
     print("Tokens:", tokens)
-    analizador = Sintactico(tokens)
+    analizador = Sintactico(tokens, entorno)
     resultado = analizador.analisisSintactico()
     print("Resultado:", resultado)
     return resultado
 
 
-def evaluar(texto, mostrar_tokens=True):
+def evaluar(texto, mostrar_tokens=True, entorno=None):
     """Como ``ejecutar_linea`` pero devuelve ``(resultado, tokens)``.
 
     A diferencia de ``ejecutar_linea`` no imprime nada: quien llama decide si
@@ -70,7 +71,7 @@ def evaluar(texto, mostrar_tokens=True):
     tokens = Lexico().tokenizar(texto)
     if mostrar_tokens:
         print("Tokens:", tokens)
-    resultado = Sintactico(tokens).analisisSintactico()
+    resultado = Sintactico(tokens, entorno).analisisSintactico()
     return resultado, tokens
 
 
@@ -87,6 +88,9 @@ def ejecutar_programa(texto, mostrar_tokens=True):
     _buffer.seek(0)
     _buffer.truncate(0)
 
+    # Las variables viven lo que dura este programa.
+    entorno = Entorno()
+
     with contextlib.redirect_stdout(_buffer):
         lineas = []
         for numero, linea in enumerate(texto.splitlines(), start=1):
@@ -94,7 +98,7 @@ def ejecutar_programa(texto, mostrar_tokens=True):
                 continue
             registro = {"linea": numero, "codigo": linea.strip(), "ok": True}
             try:
-                resultado, tokens = evaluar(linea, mostrar_tokens=mostrar_tokens)
+                resultado, tokens = evaluar(linea, mostrar_tokens=mostrar_tokens, entorno=entorno)
                 registro["resultado"] = _serializar(resultado)
                 if mostrar_tokens:
                     registro["tokens"] = [t.to_json() for t in tokens[:MAX_TOKENS_POR_LINEA]]
@@ -118,7 +122,7 @@ def ejecutar_programa(texto, mostrar_tokens=True):
     }
 
 
-def ejecutar_archivo(ruta):
+def ejecutar_archivo(ruta, entorno=None):
     """Interpreta un archivo .le linea por linea.
 
     Un error en una linea no detiene el script: se informa y se sigue con la
@@ -143,6 +147,10 @@ def ejecutar_archivo(ruta):
         print("No hay nada")
         return None
 
+    # Cada archivo tiene sus propias variables salvo que se pase un entorno.
+    if entorno is None:
+        entorno = Entorno()
+
     print(f"Ejecutando archivo: {ruta}")
     resultado = None
     errores = 0
@@ -154,7 +162,7 @@ def ejecutar_archivo(ruta):
 
         print(f"\n--- Línea {num}: {linea} ---")
         try:
-            resultado = ejecutar_linea(linea)
+            resultado = ejecutar_linea(linea, entorno)
         except LatticeError as error:
             errores += 1
             print(f"Error en la línea {num}: {error}")

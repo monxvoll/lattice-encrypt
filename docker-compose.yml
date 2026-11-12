@@ -6,4 +6,10 @@ services:
     container_name: lattice-language
     ports:
       - "8000:8000"
+    environment:
+      # En local se permite guardar y borrar programas desde el editor.
+      # render.yaml usa MODO_DEMO=1 para la demo publica.
+      MODO_DEMO: "0"
+      # Segundos maximos por ejecucion antes de cortarla.
+      TIEMPO_LIMITE: "5"
     restart: unless-stopped

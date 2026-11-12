@@ -35,7 +35,8 @@
     vista: 'consola',     // consola | resultados | errores
     ultimoInforme: null,
     zoom: 13,
-    mostrarTokens: true
+    mostrarTokens: true,
+    modoDemo: false       // el servidor no deja guardar ni borrar (MODO_DEMO=1)
   };
 
   var LLAVE_TOKENS = 'lattice:tokens';
@@ -634,7 +635,31 @@
 
   // ------------------------------------------------------- Guardar / abrir --
 
+  function aplicarModoDemo() {
+    estado.modoDemo = true;
+    // El servidor responde 403 a guardar y a borrar cuando corre con
+    // MODO_DEMO=1. Esconder los controles es mejor que dejar un boton a mano
+    // que solo puede fallar.
+    var guardar = $('#btn-guardar');
+    var menu = $('#btn-menu-programas');
+    if (guardar) guardar.hidden = true;
+    if (menu) menu.hidden = true;
+  }
+
+  function consultarModoDemo() {
+    // El estado del servicio lo dice la raiz; si no se puede leer, se deja el
+    // editor como esta: es preferible mostrar de mas que ocultar de menos.
+    return fetch('/')
+      .then(function (r) { return r.json(); })
+      .then(function (info) { if (info && info.modo_demo) aplicarModoDemo(); })
+      .catch(function () { });
+  }
+
   function abrirGuardar() {
+    if (estado.modoDemo) {
+      avisar('Este despliegue es una demo: no se pueden guardar programas.', 'error');
+      return;
+    }
     var p = programaActivo();
     if (!p) return;
     var input = $('#input-nombre');
@@ -689,6 +714,7 @@
   }
 
   function refrescarMenuProgramas() {
+    if (estado.modoDemo) return;
     return cargarProgramas().then(function (nombres) {
       var menu = $('#menu-programas');
       if (!menu) return;
@@ -1000,7 +1026,9 @@
     mostrarVacio(true);
     ponerIndicador('Listo', '');
 
-    refrescarMenuProgramas();
+    // Primero se pregunta si el despliegue es demo: de esa respuesta depende si
+    // tiene sentido pedir la lista de programas guardados.
+    consultarModoDemo().then(refrescarMenuProgramas);
   }
 
   if (document.readyState === 'loading') {

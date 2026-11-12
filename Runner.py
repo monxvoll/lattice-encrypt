@@ -1,7 +1,8 @@
+from core.entorno import Entorno
 from core.interpreteArchivo import ejecutar_archivo, ejecutar_linea
 
 print("=== Intérprete Lattice Encrypt ===")
-print("Escribe un comando o 'salir' para terminar).")
+print("Escribe un comando o 'salir' para terminar.")
 print("Ejemplos:")
 print("  Leer un archivo -  ejecutar ..../file.le ")
 print("  VECTOR(1,2) SUMA VECTOR(3,4)")
@@ -16,6 +17,10 @@ print("  VECTOR(1,2) IGUAL VECTOR(1,2)")
 print("  VECTOR(0,0) TEXTO \"AB\"")
 print("  VECTOR(65,66) CARACTERES")
 print("  MATRIZ(72,79,76,65) CARACTERES")
+print("  A = VECTOR(1,2)   y luego   A SUMA A")
+
+# Las variables duran toda la sesion de consola.
+entorno = Entorno()
 
 while True:
     try:
@@ -34,7 +39,12 @@ while True:
                 print("Error: Debes proporcionar la ruta del archivo (ej. ejecutar archivo.le)")
             continue
 
-        ejecutar_linea(texto)
+        ejecutar_linea(texto, entorno)
 
+    # Sin stdin (pipe cerrado, Docker sin -it) input() lanza EOFError en cada
+    # vuelta; si lo atrapara el except general el bucle no terminaria nunca.
+    except (EOFError, KeyboardInterrupt):
+        print()
+        break
     except Exception as e:
         print(f"Error: {e}")

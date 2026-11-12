@@ -175,3 +175,19 @@ def test_bug6_utilidad_de_redondeo():
 def test_bug6_caracteres_usa_el_redondeo_corregido():
     """CARACTERES tambien usaba round(): con 64.5 el ascii debe ser 'A' (65), no '@' (64)."""
     assert ev("VECTOR(64.5,66) CARACTERES") == "AB"
+
+
+# --- Errores que antes salian como "Error interno" ---------------------------
+from core.errores import LatticeSyntaxError as _SyntaxErr, LatticeValueError as _ValueErr
+
+
+@pytest.mark.parametrize("linea", ["VECTOR(1.2.3,4)", "VECTOR(1..2,3)"])
+def test_numero_mal_formado_es_error_de_sintaxis(linea):
+    with pytest.raises(_SyntaxErr, match="Numero no valido"):
+        ejecutar_linea(linea)
+
+
+@pytest.mark.parametrize("linea", ["VECTOR(99999999,1) CARACTERES", "VECTOR(-1,65) CARACTERES"])
+def test_codigo_fuera_de_unicode_es_error_de_valor(linea):
+    with pytest.raises(_ValueErr, match="Unicode"):
+        ejecutar_linea(linea)

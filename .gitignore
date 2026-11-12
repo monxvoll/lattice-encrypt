@@ -31,6 +31,9 @@ MANIFEST
 #   before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# El spec del ejecutable se versiona: lista los modulos que PyInstaller no ve
+# porque se importan dinamicamente (reglas/*, core/cripto/*).
+!lattice-encrypt.spec
 
 # Installer logs
 pip-log.txt

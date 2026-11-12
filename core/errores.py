@@ -26,3 +26,7 @@ class LatticeValueError(LatticeError, ValueError):
 
 class LatticeDivisionError(LatticeError, ZeroDivisionError):
     """Modulo o division por cero."""
+
+
+class LatticeNameError(LatticeError, NameError):
+    """Uso de una variable que no ha sido definida."""

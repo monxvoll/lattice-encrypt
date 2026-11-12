@@ -142,6 +142,11 @@ html.dark body { color-scheme: dark; }
 .btn:focus-visible { outline: 2px solid var(--primario); outline-offset: 1px; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* El display de arriba le gana al [hidden] del navegador, asi que esconder un
+   boton con el atributo hidden no serviria de nada sin esta regla. La usa el
+   editor en modo demo para no ofrecer guardar. */
+.btn[hidden] { display: none; }
+
 .btn-icono { width: 32px; padding: 0; }
 .btn-plano { border-color: transparent; background: transparent; }
 .btn-plano:hover { background: var(--apagado); }

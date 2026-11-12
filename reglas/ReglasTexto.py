@@ -1,11 +1,21 @@
 from core.errores import LatticeSyntaxError, LatticeTypeError, LatticeValueError
 from core.utilidades import redondear_lattice
 
+def _caracter(valor):
+    """chr() con error del lenguaje para codigos fuera del rango Unicode."""
+    codigo = redondear_lattice(valor)
+    if not 0 <= codigo <= 0x10FFFF:
+        raise LatticeValueError(f"El codigo {codigo} no es un caracter Unicode valido")
+    return chr(codigo)
+
+
 def revisarSintaxisTexto(sintactico, lado_izquierdo, operador):
     """Maneja las operaciones TEXTO y CARACTERES"""
     
     if operador == "TEXTO":
         # Sintaxis esperada: VECTOR(0,0) TEXTO "AB" o MATRIZ(0,0,0,0) TEXTO "HOLA"
+        if not isinstance(lado_izquierdo, (tuple, list)):
+            raise LatticeTypeError('TEXTO como operador requiere un VECTOR o MATRIZ: VECTOR(0,0) TEXTO "AB"')
         # El lexer ya entrega el contenido entre comillas como un único token
         # CADENA, con los espacios y las minúsculas intactos.
         cadena = sintactico.actual()
@@ -27,11 +37,11 @@ def revisarSintaxisTexto(sintactico, lado_izquierdo, operador):
             
     elif operador == "CARACTERES":
         if isinstance(lado_izquierdo, tuple):
-            return chr(redondear_lattice(lado_izquierdo[0])) + chr(redondear_lattice(lado_izquierdo[1]))
+            return _caracter((lado_izquierdo[0])) + _caracter((lado_izquierdo[1]))
         elif isinstance(lado_izquierdo, list):
-            return (chr(redondear_lattice(lado_izquierdo[0][0]))
-                    + chr(redondear_lattice(lado_izquierdo[0][1]))
-                    + chr(redondear_lattice(lado_izquierdo[1][0]))
-                    + chr(redondear_lattice(lado_izquierdo[1][1])))
+            return (_caracter((lado_izquierdo[0][0]))
+                    + _caracter((lado_izquierdo[0][1]))
+                    + _caracter((lado_izquierdo[1][0]))
+                    + _caracter((lado_izquierdo[1][1])))
         else:
             raise LatticeTypeError("CARACTERES requiere un VECTOR o MATRIZ")
