@@ -1,17 +1,10 @@
-from core.errores import LatticeSyntaxError, LatticeTypeError, LatticeDivisionError
+from core.errores import LatticeTypeError, LatticeDivisionError
 
 def revisarSintaxisAritmetica(sintactico, lado_izquierdo, operador):
     """Maneja RESTA (Resta de vectores) y MOD (Módulo por componentes)"""
 
     # Parseamos el lado derecho (El vector que va después de la palabra RESTA/MOD)
-    tipo_derecho = sintactico.consumir("PALABRA").valor.upper()
-
-    if tipo_derecho == "VECTOR":
-        lado_derecho = sintactico.parsear_vector()
-    elif tipo_derecho == "MATRIZ":
-        lado_derecho = sintactico.parsear_matriz()
-    else:
-        raise LatticeSyntaxError(f"Tipo de operando derecho no reconocido: {tipo_derecho}")
+    lado_derecho = sintactico.parsear_operando()
 
     # Lógica de cálculo matemático
     if operador == "RESTA":

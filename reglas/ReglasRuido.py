@@ -1,6 +1,6 @@
 import random
 
-from core.errores import LatticeSyntaxError, LatticeTypeError
+from core.errores import LatticeTypeError
 from core.utilidades import redondear_lattice
 
 def revisarSintaxisRuido(sintactico, lado_izquierdo, operador):
@@ -10,24 +10,19 @@ def revisarSintaxisRuido(sintactico, lado_izquierdo, operador):
 
         if sintactico.actual() is not None:
 
-            tipo_derecho = sintactico.consumir("PALABRA").valor.upper()
-            if tipo_derecho == "VECTOR":
-                ruido = sintactico.parsear_vector()
+            ruido = sintactico.parsear_operando()
+            if isinstance(ruido, tuple):
                 if isinstance(lado_izquierdo, tuple):
                     return (lado_izquierdo[0] + ruido[0], lado_izquierdo[1] + ruido[1])
-                else:
-                    raise LatticeTypeError("RUIDO con VECTOR requiere un VECTOR como operando izquierdo")
-            elif tipo_derecho == "MATRIZ":
-                ruido = sintactico.parsear_matriz()
+                raise LatticeTypeError("RUIDO con VECTOR requiere un VECTOR como operando izquierdo")
+            if isinstance(ruido, list):
                 if isinstance(lado_izquierdo, list):
                     return [
                         [lado_izquierdo[0][0] + ruido[0][0], lado_izquierdo[0][1] + ruido[0][1]],
                         [lado_izquierdo[1][0] + ruido[1][0], lado_izquierdo[1][1] + ruido[1][1]]
                     ]
-                else:
-                    raise LatticeTypeError("RUIDO con MATRIZ requiere una MATRIZ como operando izquierdo")
-            else:
-                raise LatticeSyntaxError(f"Tipo de operando derecho no reconocido: {tipo_derecho}")
+                raise LatticeTypeError("RUIDO con MATRIZ requiere una MATRIZ como operando izquierdo")
+            raise LatticeTypeError("El ruido explicito debe ser un VECTOR o una MATRIZ")
         else:
     
             if isinstance(lado_izquierdo, tuple):
