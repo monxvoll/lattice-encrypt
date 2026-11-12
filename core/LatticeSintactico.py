@@ -67,7 +67,11 @@ class Sintactico:
             multiplicador = -1
             
         num_token = self.consumir("NUMERO")
-        return float(num_token.valor) * multiplicador
+        try:
+            return float(num_token.valor) * multiplicador
+        except ValueError:
+            # El lexico agrupa digitos y puntos sin validar: '1.2.3' llega aqui.
+            raise LatticeSyntaxError(f"Numero no valido: {num_token.valor}") from None
 
     # --- HELPERS PARA PARSEAR ESTRUCTURAS ---
     def parsear_vector(self):
