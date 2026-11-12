@@ -102,3 +102,41 @@ def test_tokens_sobrantes(linea):
 
 def test_vector_literal_sigue_igual():
     assert correr('VECTOR(0,0) TEXTO "AB"')[0] == (65.0, 66.0)
+
+
+# --- Alcance del entorno -----------------------------------------------------
+import os
+import subprocess
+import sys
+
+from core.interpreteArchivo import ejecutar_archivo, ejecutar_programa
+
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def test_programa_comparte_variables():
+    informe = ejecutar_programa("A = VECTOR(1,2)\nA SUMA A")
+    assert informe["errores"] == 0
+    assert informe["lineas"][1]["resultado"] == [2.0, 4.0]
+
+
+def test_programas_no_comparten_variables():
+    ejecutar_programa("A = VECTOR(1,2)")
+    informe = ejecutar_programa("A SUMA A")
+    assert informe["errores"] == 1
+    assert informe["lineas"][0]["tipo"] == "LatticeNameError"
+
+
+def test_archivo_comparte_variables(tmp_path):
+    p = tmp_path / "p.le"
+    p.write_text("A = VECTOR(1,2)\nA SUMA A\n", encoding="utf-8")
+    assert ejecutar_archivo(str(p)) == (2.0, 4.0)
+
+
+def test_runner_recuerda_variables():
+    salida = subprocess.run(
+        [sys.executable, "Runner.py"],
+        input="A = VECTOR(1,2)\nA SUMA A\nsalir\n",
+        capture_output=True, text=True, cwd=RAIZ, timeout=30,
+    )
+    assert "(2.0, 4.0)" in salida.stdout
