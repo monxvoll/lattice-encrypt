@@ -109,11 +109,11 @@ class Lexico:
                 tokens.append(Token("CADENA", "".join(buffer)))
                 continue
 
-            # Leer Letras (Palabras Reservadas)
+            # Leer palabras: instrucciones y nombres de variable. Tras la
+            # primera letra se admiten digitos y '_' (CLAVES2, MI_CLAVE).
             if char.isalpha():
                 inicio = i
-                # avanza mientras encuentra letras
-                while i < n and texto[i].isalpha():
+                while i < n and (texto[i].isalpha() or texto[i].isdigit() or texto[i] == "_"):
                     i += 1
                 palabra = texto[inicio:i]  
                 
