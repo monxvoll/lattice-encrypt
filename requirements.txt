@@ -5,3 +5,8 @@
 # Para actualizarlas a proposito, se cambia el numero aqui y se vuelve a probar.
 fastapi==0.136.3
 uvicorn[standard]==0.48.0
+# Criptografia: numpy para la aritmetica matricial de FrodoPKE-640 (LWE propio)
+# y cryptography para ML-KEM-768, HKDF y AES-GCM. ML-KEM llego en la 50.x; con
+# la 46.x KEYGEN MLKEM falla.
+numpy==2.4.2
+cryptography==50.0.2
