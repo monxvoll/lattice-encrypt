@@ -1,0 +1,5 @@
+# Dependencias para desarrollo y pruebas (no van en la imagen de Docker).
+# Instalar con: pip install -r requirements-dev.txt
+-r requirements.txt
+pytest==9.0.3
+httpx==0.28.1

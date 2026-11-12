@@ -1,30 +1,117 @@
 # Interprete Lattice Encrypt
 
-Interprete diseñado para ejecutar operaciones matematicas orientadas a la criptografia basada en reticulos (Lattice Cryptography), especificamente el algoritmo LWE (Learning With Errors). El lenguaje permite realizar operaciones sobre matrices y vectores, inyeccion de ruido, redondeo, y cifrado/descifrado de informacion.
+Interprete diseñado para ejecutar operaciones matematicas orientadas a la criptografia basada en reticulos (Lattice Cryptography), especificamente el algoritmo LWE (Learning With Errors). El lenguaje permite realizar operaciones sobre matrices y vectores, inyeccion de ruido, redondeo, y conversion entre texto y vectores. Las operaciones de cifrado (`KEYGEN`, `CIFRAR`, `DESCIFRAR`) estan reservadas en el lenguaje pero aun no implementadas.
+
+## Ejemplos del lenguaje
+
+```
+VECTOR(1,2) SUMA VECTOR(3,4)          -> (4.0, 6.0)
+MATRIZ(2,0,0,2) POR VECTOR(3,4)
+VECTOR(1,2) PUNTO VECTOR(3,4)
+VECTOR(1,2) RUIDO VECTOR(1,-1)
+VECTOR(1.4, 2.6) REDONDEAR
+VECTOR(5,7) MOD VECTOR(2,3)
+VECTOR(1,2) IGUAL VECTOR(1,2)
+VECTOR(0,0) TEXTO "AB"
+VECTOR(65,66) CARACTERES
+```
+
+El archivo `lattice.le` contiene un programa de ejemplo.
 
 ## Estructura del Proyecto
 
-El proyecto se divide en los siguientes modulos principales:
+*   **core/**: nucleo del interprete.
+    *   `LatticeLexico.py`: Analizador Lexico (`Lexico`). Lee el texto caracter por caracter y lo agrupa en Tokens (palabras reservadas, numeros y simbolos).
+    *   `LatticeSintactico.py`: Analizador Sintactico (`Sintactico`). Comprueba que los tokens cumplan la gramatica y despacha cada operacion a su modulo de `reglas/`.
+    *   `Token.py`: estructura `Token` (tipo y valor) que viaja del lexico al sintactico.
+    *   `interpreteArchivo.py`: ejecuta una linea o un archivo `.le` completo.
+    *   `ejecutor.py`: ejecuta codigo capturando la salida; lo usa el servidor.
+    *   `errores.py` y `utilidades.py`: manejo de errores y funciones auxiliares.
+*   **reglas/**: operaciones del lenguaje, una categoria por archivo (`ReglasAritmetica.py`, `ReglasComparacion.py`, `ReglasRuido.py`, `ReglasTexto.py`, `ReglasLattice.py`).
+    *   `reglas.json`: configuracion del despachador dinamico. Define que funcion valida cada grupo de operaciones.
+*   **Runner.py**: consola interactiva del interprete.
+*   **servidor.py**: API REST (FastAPI) y editor web.
+*   **web/**: pagina del editor (`index.html`, `app.js`, `estilos.css`).
+*   **tests/**: pruebas automaticas con pytest.
+*   **docs/**: diagramas de arquitectura, secuencia y automatas (Markdown/Mermaid).
+*   **Dockerfile**, **docker-compose.yml**, **render.yaml**: contenedor y despliegue.
 
-*   **LatticeLexico.py**: Contiene el Analizador Lexico (`Lexico`). Se encarga de leer el texto de entrada caracter por caracter y agruparlos en Tokens validos (palabras reservadas, numeros y simbolos).
-*   **LatticeSintactico.py**: Contiene el Analizador Sintactico (`Sintactico`). Recibe la lista de tokens del analizador lexico y comprueba que cumplan las reglas gramaticales del lenguaje. Adicionalmente, incluye metodos para ejecutar las operaciones matematicas correspondientes.
-*   **Token.py**: Define la estructura de datos `Token` utilizada para transportar informacion entre el analizador lexico y el sintactico. Almacena el tipo de token y su valor literal.
-*   **Runner.py**: Punto de entrada del programa. Permite definir instrucciones en texto, pasarlas por el proceso lexico, luego por el sintactico y mostrar el resultado por consola.
-*   **reglas.json**: Archivo de configuracion del despachador dinamico. Define los grupos de operaciones permitidas y que funcion especifica del analizador sintactico debe llamarse para validar cada grupo.
-*   **docs/**: Directorio que incluye documentacion teorica, incluyendo diagramas de los automatas en formato Markdown/Mermaid (lexico para simbolos, palabras y un ejemplo sintactico de suma de vectores).
+## Uso
+
+### Consola interactiva
+
+```
+python Runner.py
+>> VECTOR(1,2) SUMA VECTOR(3,4)
+>> ejecutar lattice.le
+>> salir
+```
+
+### Ejecutable de escritorio
+
+El ejecutable se genera con PyInstaller a partir de `lattice-encrypt.spec`:
+
+```
+pip install pyinstaller
+pyinstaller lattice-encrypt.spec
+```
+
+El resultado queda en `dist/lattice-encrypt.exe`.
+
+### Servidor web (API + editor)
+
+```
+pip install -r requirements.txt
+uvicorn servidor:app --reload
+```
+
+*   `GET /`: nombre, version y estado del servicio.
+*   `POST /iniciar`: recibe `{"codigo": "..."}` y devuelve el resultado y los tokens.
+*   `POST /ejecutar`: ejecuta un programa completo (lo usa el editor).
+*   `GET/POST/DELETE /api/programas`: listar, guardar y borrar programas.
+*   `GET /editor`: editor web.
+*   `GET /docs`: documentacion interactiva de la API.
+
+Variables de entorno:
+
+| Variable | Descripcion | Por defecto |
+|---|---|---|
+| `MODO_DEMO` | Con `1` se puede ejecutar pero no guardar ni borrar programas | desactivado |
+| `TIEMPO_LIMITE` | Segundos maximos por ejecucion | `5` |
+| `PROGRAMAS_DIR` | Carpeta donde se guardan los programas | `programas/` |
+| `PORT` | Puerto del contenedor (lo usa Render) | `8000` |
+
+### Docker
+
+```
+docker compose up --build
+```
+
+El servicio queda en `http://localhost:8000` y el editor en `http://localhost:8000/editor`.
+
+### Despliegue en Render
+
+`render.yaml` define el servicio (Docker, `MODO_DEMO=1`, health check en `/`). Los pasos estan en `despliegue-render-lattice-encrypt.md`.
+
+## Pruebas
+
+```
+pip install -r requirements-dev.txt
+python -m pytest -q
+```
 
 ## Metodologia de Trabajo en Equipo
 
-El proyecto utiliza un patron de despacho dinamico a traves de `reglas.json` para facilitar la extension del lenguaje sin causar conflictos. Cada miembro del equipo debe seguir estrictamente este flujo de trabajo (GitHub Flow):
+El proyecto utiliza un patron de despacho dinamico a traves de `reglas/reglas.json` para facilitar la extension del lenguaje sin causar conflictos. Cada miembro del equipo debe seguir estrictamente este flujo de trabajo (GitHub Flow):
 
-1. **Sincronizar código local**: Antes de empezar a programar, asegúrarse de tener la última versión del código base.
+1. **Sincronizar código local**: Antes de empezar a programar, asegurarse de tener la última versión del código base.
    * `git checkout main`
    * `git pull origin main`
 2. **Crear una rama aislada**: Crear una rama descriptiva para la tarea a realizar.
    * `git checkout -b feature/nombre-de-categoria`
-3. **Identificar la función**: Revisar el archivo `reglas.json` para ver qué nombre de método  tocó implementar (ej. `revisarSintaxisRuido`). No es necesario modificar el JSON.
-4. **Desarrollar la lógica**: Abrir el archivo correspondiente a la categoría dentro de la carpeta `reglas/` (ej. `reglas/ReglasRuido.py`). Escribir la lógica matemática dentro de la función que ya está definida allí. **: No es necesario modificar `LatticeSintactico.py` ni `reglas.json`.**
-5. **Subir los cambios (Commit & Push)**: Guardar los cambios con mensajes descriptivos y súbirlos a la rama remota.
+3. **Identificar la función**: Revisar el archivo `reglas/reglas.json` para ver qué nombre de método tocó implementar (ej. `revisarSintaxisRuido`). No es necesario modificar el JSON.
+4. **Desarrollar la lógica**: Abrir el archivo correspondiente a la categoría dentro de la carpeta `reglas/` (ej. `reglas/ReglasRuido.py`). Escribir la lógica matemática dentro de la función que ya está definida allí. **No es necesario modificar `LatticeSintactico.py` ni `reglas.json`.**
+5. **Subir los cambios (Commit & Push)**: Guardar los cambios con mensajes descriptivos y subirlos a la rama remota.
    * `git commit -m "feat: agrega operaciones de ruido"`
    * `git push origin feature/nombre-de-categoria`
-6. **Pull Request (PR)**: Ir a GitHub y abrir un Pull Request hacia `main`. Solicitar la revisión de al menos un compañero  antes de fusionar el código.
+6. **Pull Request (PR)**: Ir a GitHub y abrir un Pull Request hacia `main`. Solicitar la revisión de al menos un compañero antes de fusionar el código.
