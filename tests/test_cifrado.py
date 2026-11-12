@@ -94,3 +94,19 @@ def test_api_programa_completo():
     assert resultados.count(True) == 2
     assert "<CLAVES ML-KEM-768>" in resultados
     assert "privada" not in r.text and "array" not in r.text
+
+
+@pytest.mark.parametrize("codigo, resumen", [
+    ("KEYGEN", "<CLAVES LWE FrodoPKE-640>"),
+    ("KEYGEN MLKEM", "<CLAVES ML-KEM-768>"),
+])
+def test_api_iniciar_keygen_devuelve_solo_el_resumen(codigo, resumen):
+    r = TestClient(app).post("/iniciar", json={"codigo": codigo})
+    assert r.status_code == 200
+    assert r.json()["resultado"] == resumen
+
+
+@pytest.mark.parametrize("izquierdo", ['S = TEXTO "AB"', "S = KEYGEN"])
+def test_texto_como_operador_valida_el_operando_izquierdo(izquierdo):
+    with pytest.raises(LatticeTypeError):
+        correr(izquierdo, 'S TEXTO "AB"')

@@ -6,6 +6,8 @@ def revisarSintaxisTexto(sintactico, lado_izquierdo, operador):
     
     if operador == "TEXTO":
         # Sintaxis esperada: VECTOR(0,0) TEXTO "AB" o MATRIZ(0,0,0,0) TEXTO "HOLA"
+        if not isinstance(lado_izquierdo, (tuple, list)):
+            raise LatticeTypeError('TEXTO como operador requiere un VECTOR o MATRIZ: VECTOR(0,0) TEXTO "AB"')
         # El lexer ya entrega el contenido entre comillas como un único token
         # CADENA, con los espacios y las minúsculas intactos.
         cadena = sintactico.actual()

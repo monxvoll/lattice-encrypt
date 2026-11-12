@@ -33,7 +33,7 @@ from core.LatticeLexico import Lexico
 from core.LatticeSintactico import Sintactico
 from core.ejecutor import ejecutar as ejecutar_en_proceso
 from core.errores import LatticeError
-from core.interpreteArchivo import EXTENSION
+from core.interpreteArchivo import EXTENSION, _serializar
 
 app = FastAPI(
     title="LatticeEncrypt",
@@ -226,7 +226,9 @@ def ejecutar_codigo(request: CodigoRequest):
         resultado = analizador.analisisSintactico()
         return {
             "exito": True,
-            "resultado": resultado,
+            # _serializar convierte claves y criptogramas en su resumen: sin
+            # esto FastAPI recorreria el dataclass y expondria la clave privada.
+            "resultado": _serializar(resultado),
             "tokens": [
                 token.to_json()
                 for token in tokens]
